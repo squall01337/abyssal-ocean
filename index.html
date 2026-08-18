@@ -2,22 +2,27 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#05080c">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>ABYSSAL — Spectral FFT Ocean</title>
 <style>
   :root{
     --bg:#05080c; --panel:rgba(10,16,22,.82); --line:rgba(140,200,230,.16);
     --txt:#cfe3ee; --dim:#7d95a4; --acc:#5fd0e8;
+    --sheet-h:0px;
   }
   *{box-sizing:border-box}
-  html,body{margin:0;height:100%;background:var(--bg);overflow:hidden;
-    font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--txt)}
-  canvas{display:block;width:100vw;height:100vh}
+  html,body{margin:0;height:100%;height:100dvh;width:100%;background:var(--bg);overflow:hidden;
+    font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--txt);
+    overscroll-behavior:none;-webkit-text-size-adjust:100%;color-scheme:dark}
+  canvas{display:block;width:100%;height:100%;touch-action:none;-webkit-user-select:none;user-select:none}
   #panel{
-    position:fixed;top:12px;right:12px;width:288px;max-height:calc(100vh - 24px);
+    position:fixed;top:12px;right:12px;width:288px;max-height:calc(100dvh - 24px);
     overflow-y:auto;background:var(--panel);backdrop-filter:blur(14px);
     border:1px solid var(--line);border-radius:10px;padding:10px 12px 14px;
-    box-shadow:0 18px 50px rgba(0,0,0,.55);z-index:10
+    box-shadow:0 18px 50px rgba(0,0,0,.55);z-index:10;
+    -webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain
   }
   #panel::-webkit-scrollbar{width:7px}
   #panel::-webkit-scrollbar-thumb{background:rgba(120,180,210,.22);border-radius:4px}
@@ -60,6 +65,82 @@
   #boot.gone{opacity:0;pointer-events:none}
   #err{position:fixed;inset:0;display:none;align-items:center;justify-content:center;
     padding:40px;text-align:center;color:#ff9a9a;background:#05080c;z-index:60;line-height:1.8}
+  #pads{display:none}
+  .cluster{display:flex;flex-direction:column;align-items:center;gap:5px;pointer-events:auto}
+  .cluster>span{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+  .dpad{display:grid;grid-template-areas:". n ." "w c e" ". s .";
+    grid-template-columns:46px 46px 46px;grid-template-rows:46px 46px 46px;gap:5px}
+  .heave{display:flex;flex-direction:column;gap:5px}
+  #pads button{
+    width:46px;height:46px;padding:0;border:1px solid var(--line);border-radius:10px;
+    background:var(--panel);color:var(--acc);font:700 14px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+    backdrop-filter:blur(14px);box-shadow:0 10px 28px rgba(0,0,0,.4);touch-action:none;
+    -webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;cursor:pointer
+  }
+  #pads button:active,#pads button.held{background:rgba(95,208,232,.22);border-color:rgba(95,208,232,.45)}
+  #pads button[data-slot=n]{grid-area:n}
+  #pads button[data-slot=s]{grid-area:s}
+  #pads button[data-slot=w]{grid-area:w}
+  #pads button[data-slot=e]{grid-area:e}
+  @media (pointer:coarse){
+    .desk-hint{display:none}
+    #hud{
+      top:max(10px, env(safe-area-inset-top));bottom:auto;
+      left:max(10px, env(safe-area-inset-left));right:auto;
+      max-width:calc(100vw - 20px);font-size:10px;padding:6px 8px
+    }
+    #pads{
+      display:flex;align-items:flex-end;gap:8px;position:fixed;z-index:12;
+      left:max(8px, env(safe-area-inset-left));
+      bottom:max(12px, env(safe-area-inset-bottom));
+      pointer-events:none
+    }
+    input[type=range]{height:28px}
+    input[type=range]::-webkit-slider-thumb{width:18px;height:18px;margin-top:-8px}
+  }
+  @media (max-width:900px) and (orientation:portrait){
+    :root{--sheet-h:min(40dvh, 340px)}
+    #panel{
+      top:auto;right:0;left:0;bottom:0;width:100%;max-height:var(--sheet-h);
+      border-radius:14px 14px 0 0;padding:10px 14px calc(12px + env(safe-area-inset-bottom));
+      box-shadow:0 -12px 40px rgba(0,0,0,.5)
+    }
+    #pads{
+      display:flex;align-items:flex-end;gap:8px;position:fixed;z-index:12;
+      left:max(8px, env(safe-area-inset-left));
+      bottom:calc(var(--sheet-h) + 8px);
+      pointer-events:none
+    }
+    #hud{
+      top:max(10px, env(safe-area-inset-top));bottom:auto;
+      left:max(10px, env(safe-area-inset-left))
+    }
+    .desk-hint{display:none}
+  }
+  @media (max-width:430px){
+    .dpad{grid-template-columns:38px 38px 38px;grid-template-rows:38px 38px 38px;gap:4px}
+    #pads{gap:6px}
+    #pads button{width:38px;height:38px;border-radius:8px}
+  }
+  @media (max-width:900px) and (max-height:700px) and (orientation:portrait){
+    :root{--sheet-h:min(34dvh, 250px)}
+  }
+  @media (max-width:950px) and (orientation:landscape){
+    :root{--sheet-h:0px}
+    #panel{
+      top:max(8px, env(safe-area-inset-top));right:max(8px, env(safe-area-inset-right));
+      bottom:max(8px, env(safe-area-inset-bottom));left:auto;
+      width:min(250px, 40vw);max-height:none;border-radius:10px;
+      padding:8px 10px 12px
+    }
+    #pads{
+      left:max(8px, env(safe-area-inset-left));
+      bottom:max(10px, env(safe-area-inset-bottom))
+    }
+    .dpad{grid-template-columns:38px 38px 38px;grid-template-rows:38px 38px 38px;gap:4px}
+    #pads button{width:38px;height:38px}
+    .desk-hint{display:none}
+  }
 </style>
 </head>
 <body>
@@ -72,7 +153,35 @@
 
 <div id="hud">
   <div><b id="fps">--</b> fps &nbsp;·&nbsp; <span id="stat"></span></div>
-  <div><kbd>drag</kbd> look &nbsp; <kbd>W A S D</kbd> move &nbsp; <kbd>Space</kbd>/<kbd>Ctrl</kbd> up/down &nbsp; <kbd>wheel</kbd> speed</div>
+  <div class="desk-hint"><kbd>drag</kbd> look &nbsp; <kbd>W A S D</kbd> move &nbsp; <kbd>Space</kbd>/<kbd>Ctrl</kbd> up/down &nbsp; <kbd>wheel</kbd> speed</div>
+</div>
+
+<div id="pads" aria-label="Camera controls">
+  <div class="cluster">
+    <span>look</span>
+    <div class="dpad">
+      <button type="button" data-slot="n" data-look="pitch:-1" aria-label="Look up">▲</button>
+      <button type="button" data-slot="w" data-look="yaw:1" aria-label="Look left">◀</button>
+      <button type="button" data-slot="e" data-look="yaw:-1" aria-label="Look right">▶</button>
+      <button type="button" data-slot="s" data-look="pitch:1" aria-label="Look down">▼</button>
+    </div>
+  </div>
+  <div class="cluster">
+    <span>move</span>
+    <div class="dpad">
+      <button type="button" data-slot="n" data-key="ArrowUp" aria-label="Move forward">▲</button>
+      <button type="button" data-slot="w" data-key="ArrowLeft" aria-label="Move left">◀</button>
+      <button type="button" data-slot="e" data-key="ArrowRight" aria-label="Move right">▶</button>
+      <button type="button" data-slot="s" data-key="ArrowDown" aria-label="Move back">▼</button>
+    </div>
+  </div>
+  <div class="cluster">
+    <span>heave</span>
+    <div class="heave">
+      <button type="button" data-key="Space" aria-label="Move up">▲</button>
+      <button type="button" data-key="ControlLeft" aria-label="Move down">▼</button>
+    </div>
+  </div>
 </div>
 
 <div id="boot"><div class="t">ABYSSAL</div><div class="s" id="bootmsg">initialising…</div></div>
@@ -95,7 +204,8 @@ const step = (m) => { bootmsg.textContent = m; };
    CONFIGURATION
    ══════════════════════════════════════════════════════════════════════ */
 const QS = new URLSearchParams(location.search);
-const N       = [128,256,512,1024].includes(+QS.get('n')) ? +QS.get('n') : 512;   // FFT resolution
+const IS_PHONE = matchMedia('(pointer: coarse)').matches || innerWidth <= 820;
+const N       = [128,256,512,1024].includes(+QS.get('n')) ? +QS.get('n') : (IS_PHONE ? 256 : 512);   // FFT resolution
 const LOG2N   = Math.round(Math.log2(N));
 const CASC    = 3;                                    // number of spectral cascades
 const CASC_L  = [768.0, 121.0, 19.0];                 // tile size (m) per cascade
@@ -122,16 +232,26 @@ if (!gl.getExtension('EXT_color_buffer_float'))
 const HAS_FLOAT_LINEAR = !!gl.getExtension('OES_texture_float_linear');
 gl.getExtension('EXT_float_blend');
 
+function viewSize(){
+  const vv = window.visualViewport;
+  if (vv) return { w: Math.max(2, Math.round(vv.width)), h: Math.max(2, Math.round(vv.height)) };
+  return { w: innerWidth, h: innerHeight };
+}
+
 renderer.setPixelRatio(1);
 renderer.autoClear = false;
-renderer.setSize(innerWidth, innerHeight, false);
+{
+  const { w, h } = viewSize();
+  renderer.setSize(w, h, false);
+}
 renderer.setClearColor(0x000000, 1);
 
-const camera = new THREE.PerspectiveCamera(50, innerWidth/innerHeight, 0.25, 40000);
+const camera = new THREE.PerspectiveCamera(50, viewSize().w / viewSize().h, 0.25, 40000);
 camera.position.set(-95, 16.0, 585);
 
 /* ── free-look camera controller ─────────────────────────────────────── */
-const ctl = { yaw: Math.PI + 0.16, pitch: -0.055, speed: 26, keys: Object.create(null), drag:false, lx:0, ly:0 };
+const ctl = { yaw: Math.PI + 0.16, pitch: -0.055, speed: 26, keys: Object.create(null),
+              drag:false, lx:0, ly:0, lookYaw:0, lookPitch:0 };
 canvas.addEventListener('pointerdown', e => { ctl.drag = true; ctl.lx = e.clientX; ctl.ly = e.clientY; canvas.setPointerCapture(e.pointerId); });
 canvas.addEventListener('pointerup',   e => { ctl.drag = false; try{canvas.releasePointerCapture(e.pointerId);}catch(_){} });
 canvas.addEventListener('pointermove', e => {
@@ -147,10 +267,49 @@ canvas.addEventListener('wheel', e => {
 }, {passive:false});
 addEventListener('keydown', e => { ctl.keys[e.code] = true;  if (e.code === 'Space') e.preventDefault(); });
 addEventListener('keyup',   e => { ctl.keys[e.code] = false; });
-addEventListener('blur',    () => { ctl.keys = Object.create(null); ctl.drag = false; });
+addEventListener('blur',    () => { ctl.keys = Object.create(null); ctl.drag = false; ctl.lookYaw = 0; ctl.lookPitch = 0; });
+
+document.getElementById('pads').querySelectorAll('button').forEach(btn => {
+  const key = btn.dataset.key;
+  const look = btn.dataset.look;
+  const press = (e) => {
+    e.preventDefault(); e.stopPropagation();
+    btn.classList.add('held');
+    try{ btn.setPointerCapture(e.pointerId); }catch(_){}
+    if (key) ctl.keys[key] = true;
+    if (look){
+      const [axis, raw] = look.split(':');
+      const v = parseFloat(raw);
+      if (axis === 'yaw') ctl.lookYaw = v;
+      if (axis === 'pitch') ctl.lookPitch = v;
+    }
+  };
+  const release = (e) => {
+    if (e) e.preventDefault();
+    btn.classList.remove('held');
+    if (key) ctl.keys[key] = false;
+    if (look){
+      const [axis] = look.split(':');
+      if (axis === 'yaw') ctl.lookYaw = 0;
+      if (axis === 'pitch') ctl.lookPitch = 0;
+    }
+  };
+  btn.addEventListener('pointerdown', press);
+  btn.addEventListener('pointerup', release);
+  btn.addEventListener('pointercancel', release);
+  btn.addEventListener('lostpointercapture', release);
+});
+document.addEventListener('touchmove', e => {
+  if (!e.target.closest('#panel')) e.preventDefault();
+}, {passive:false});
 
 const _fwd = new THREE.Vector3(), _rgt = new THREE.Vector3(), _mv = new THREE.Vector3();
 function updateCamera(dt){
+  if (ctl.lookYaw) ctl.yaw += ctl.lookYaw * dt * 1.55;
+  if (ctl.lookPitch){
+    ctl.pitch += ctl.lookPitch * dt * 1.25;
+    ctl.pitch = Math.max(-1.5533, Math.min(1.5533, ctl.pitch));
+  }
   const k = ctl.keys;
   camera.quaternion.setFromEuler(new THREE.Euler(ctl.pitch, ctl.yaw, 0, 'YXZ'));
   _fwd.set(0,0,-1).applyQuaternion(camera.quaternion);
@@ -324,8 +483,8 @@ const P = {
   clarity: 1.0, absorbR: 0.34, absorbG: 0.085, absorbB: 0.048,
   scatter: '#0f5f6b', sss: '#2fbfa2', sssStrength: 1.5, refract: 0.55,
   // render
-  exposure: 1.05, bloom: 0.42, ssr: true, glitter: 1.0,
-  scale: 1.5, wire: false, showFoam: true
+  exposure: 1.05, bloom: 0.42, ssr: !IS_PHONE, glitter: 1.0,
+  scale: IS_PHONE ? 1.0 : 1.5, wire: false, showFoam: true
 };
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -1186,8 +1345,9 @@ function colorRT(w, h, withDepth){
 }
 
 function allocTargets(){
-  RW = Math.max(2, Math.round(innerWidth * P.scale));
-  RH = Math.max(2, Math.round(innerHeight * P.scale));
+  const { w, h } = viewSize();
+  RW = Math.max(2, Math.round(w * P.scale));
+  RH = Math.max(2, Math.round(h * P.scale));
   [sceneRT, mainRT].forEach(rt => { if (rt){ if (rt.depthTexture) rt.depthTexture.dispose(); rt.dispose(); } });
   bloomRT.forEach(rt => rt.dispose());
   sceneRT = colorRT(RW, RH, true);
@@ -1195,8 +1355,8 @@ function allocTargets(){
   bloomRT = [];
   for (let i = 0; i < BLOOM_LEVELS; i++)
     bloomRT.push(colorRT(Math.max(2, RW >> (i+1)), Math.max(2, RH >> (i+1)), false));
-  renderer.setSize(innerWidth, innerHeight, false);
-  camera.aspect = innerWidth/innerHeight;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
   camera.updateProjectionMatrix();
   oceanU.uResolution.value.set(RW, RH);
 }
@@ -1428,7 +1588,7 @@ group('Sun & sky', b => {
   slider(b,'mieG','Mie G',0,0.99,0.005,'',false,3);
   slider(b,'sunPower','Sun intensity',0,8,0.05,'',false);
   slider(b,'skyGain','Sky gain',0.1,3,0.01,'',false);
-});
+}, IS_PHONE);
 group('Water optics', b => {
   slider(b,'clarity','Clarity',0.2,4,0.01,'×',false);
   slider(b,'absorbR','Absorption R',0,1.2,0.005,'',false,3);
@@ -1464,7 +1624,7 @@ group('Render', b => {
   });
   s2.addEventListener('change', () => { location.search = '?n=' + s2.value; });
   r2.appendChild(l2); r2.appendChild(s2); b.appendChild(r2);
-});
+}, IS_PHONE);
 
 /* presets */
 group('Presets', b => {
@@ -1501,6 +1661,7 @@ group('Presets', b => {
    ══════════════════════════════════════════════════════════════════════ */
 allocTargets();
 addEventListener('resize', () => allocTargets());
+if (window.visualViewport) visualViewport.addEventListener('resize', () => allocTargets());
 
 /* clear the foam history so the first frames are not garbage */
 renderer.setClearColor(0x000000, 1);

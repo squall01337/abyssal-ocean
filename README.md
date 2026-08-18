@@ -41,7 +41,9 @@ The water is not a scrolling normal map. It is an oceanographic wave spectrum, i
 | `Space` / `Ctrl` | up / down |
 | `wheel` | movement speed |
 
-Everything on the right panel is live: spectrum, foam, sun & sky, water optics, render. Four presets to start from — *Tropical calm*, *Golden hour*, *Open storm*, *Glass morning*.
+On a phone the parameter panel stays on screen (bottom sheet in portrait, side column in landscape) and on-screen **look / move / heave** arrows drive the camera. The ocean view is left open above the menu — nothing is tucked behind a hamburger.
+
+Everything on the panel is live: spectrum, foam, sun & sky, water optics, render. Four presets to start from — *Tropical calm*, *Golden hour*, *Open storm*, *Glass morning*.
 
 ## Running it
 
@@ -55,7 +57,7 @@ Then open `http://localhost:8000`.
 
 FFT resolution can be forced with a query string: `?n=128`, `256`, `512` (default) or `1024`.
 
-**Requires** a desktop browser with WebGL2 and `EXT_color_buffer_float` (Chrome, Edge, Firefox, Safari 15+). It leans on the GPU — drop *Supersample* to 1.0× and the FFT to 256² on a laptop.
+**Requires** a browser with WebGL2 and `EXT_color_buffer_float` (Chrome, Edge, Firefox, Safari 15+, including iOS Safari). It leans on the GPU — phones default to 256² FFT and 1.0× supersample; drop *Supersample* to 1.0× and the FFT to 256² on a laptop if needed.
 
 ## Why is it one file?
 
