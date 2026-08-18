@@ -22,12 +22,28 @@
     overflow-y:auto;background:var(--panel);backdrop-filter:blur(14px);
     border:1px solid var(--line);border-radius:10px;padding:10px 12px 14px;
     box-shadow:0 18px 50px rgba(0,0,0,.55);z-index:10;
-    -webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain
+    -webkit-overflow-scrolling:touch;touch-action:pan-y;overscroll-behavior:contain;
+    transition:transform .28s ease,opacity .22s ease
   }
   #panel::-webkit-scrollbar{width:7px}
   #panel::-webkit-scrollbar-thumb{background:rgba(120,180,210,.22);border-radius:4px}
   #panel h1{font-size:12px;letter-spacing:.22em;margin:2px 0 10px;color:var(--acc);font-weight:600}
   #panel h1 small{display:block;letter-spacing:.05em;color:var(--dim);font-weight:400;font-size:10px;margin-top:3px}
+  .panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+  .panel-head h1{flex:1;min-width:0}
+  .tools-btn{
+    display:none;align-items:center;justify-content:center;flex-shrink:0;min-height:32px;
+    margin-top:1px;padding:6px 10px;border:1px solid var(--line);
+    border-radius:6px;background:rgba(140,200,230,.08);color:var(--acc);font:inherit;font-size:10px;
+    letter-spacing:.14em;text-transform:uppercase;cursor:pointer;
+    -webkit-tap-highlight-color:transparent;touch-action:manipulation
+  }
+  .tools-btn:active{background:rgba(95,208,232,.22)}
+  #tools-show{
+    position:fixed;z-index:20;right:max(10px, env(safe-area-inset-right));
+    bottom:max(12px, env(safe-area-inset-bottom));padding:8px 12px;
+    background:var(--panel);backdrop-filter:blur(14px);box-shadow:0 10px 28px rgba(0,0,0,.45)
+  }
   .grp{border-top:1px solid var(--line);margin-top:9px;padding-top:7px}
   .grp>b{display:block;color:var(--acc);font-size:10px;letter-spacing:.16em;
     text-transform:uppercase;cursor:pointer;user-select:none;opacity:.85;margin-bottom:5px}
@@ -82,6 +98,14 @@
   #pads button[data-slot=s]{grid-area:s}
   #pads button[data-slot=w]{grid-area:w}
   #pads button[data-slot=e]{grid-area:e}
+  @media (pointer:coarse), (max-width:900px){
+    #tools-hide{display:inline-flex}
+    body.tools-hidden #tools-show{display:inline-flex}
+    body.tools-hidden{--sheet-h:0px}
+    body.tools-hidden #panel{
+      transform:translateY(110%);opacity:0;pointer-events:none
+    }
+  }
   @media (pointer:coarse){
     .desk-hint{display:none}
     #hud{
@@ -140,6 +164,7 @@
     .dpad{grid-template-columns:38px 38px 38px;grid-template-rows:38px 38px 38px;gap:4px}
     #pads button{width:38px;height:38px}
     .desk-hint{display:none}
+    body.tools-hidden #panel{transform:translateX(110%)}
   }
 </style>
 </head>
@@ -147,9 +172,13 @@
 <canvas id="c"></canvas>
 
 <div id="panel">
-  <h1>ABYSSAL<small>spectral fft ocean · webgl2</small></h1>
+  <div class="panel-head">
+    <h1>ABYSSAL<small>spectral fft ocean · webgl2</small></h1>
+    <button type="button" class="tools-btn" id="tools-hide" aria-expanded="true" aria-controls="panel">hide</button>
+  </div>
   <div id="ui"></div>
 </div>
+<button type="button" class="tools-btn" id="tools-show" aria-controls="panel" aria-expanded="false">tools</button>
 
 <div id="hud">
   <div><b id="fps">--</b> fps &nbsp;·&nbsp; <span id="stat"></span></div>
@@ -268,6 +297,18 @@ canvas.addEventListener('wheel', e => {
 addEventListener('keydown', e => { ctl.keys[e.code] = true;  if (e.code === 'Space') e.preventDefault(); });
 addEventListener('keyup',   e => { ctl.keys[e.code] = false; });
 addEventListener('blur',    () => { ctl.keys = Object.create(null); ctl.drag = false; ctl.lookYaw = 0; ctl.lookPitch = 0; });
+
+{
+  const hideBtn = document.getElementById('tools-hide');
+  const showBtn = document.getElementById('tools-show');
+  const setTools = (open) => {
+    document.body.classList.toggle('tools-hidden', !open);
+    hideBtn.setAttribute('aria-expanded', String(open));
+    showBtn.setAttribute('aria-expanded', String(open));
+  };
+  hideBtn.addEventListener('click', e => { e.preventDefault(); setTools(false); });
+  showBtn.addEventListener('click', e => { e.preventDefault(); setTools(true); });
+}
 
 document.getElementById('pads').querySelectorAll('button').forEach(btn => {
   const key = btn.dataset.key;

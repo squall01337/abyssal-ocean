@@ -41,7 +41,7 @@ The water is not a scrolling normal map. It is an oceanographic wave spectrum, i
 | `Space` / `Ctrl` | up / down |
 | `wheel` | movement speed |
 
-On a phone the parameter panel stays on screen (bottom sheet in portrait, side column in landscape) and on-screen **look / move / heave** arrows drive the camera. The ocean view is left open above the menu — nothing is tucked behind a hamburger.
+On a phone the parameter panel is a bottom sheet (side column in landscape). Tap **hide** to put it away; a **tools** chip brings it back. On-screen **look / move / heave** arrows drive the camera.
 
 Everything on the panel is live: spectrum, foam, sun & sky, water optics, render. Four presets to start from — *Tropical calm*, *Golden hour*, *Open storm*, *Glass morning*.
 
